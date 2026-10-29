@@ -1,0 +1,370 @@
+# Digital Wallet & Transaction Processing Platform
+
+A secure, scalable REST API for managing digital wallets and financial transactions, built with **FastAPI, PostgreSQL, SQLAlchemy, and Docker**.
+
+The platform is designed to support wallet operations, deposits, money transfers, withdrawals, refunds, transaction history, notifications, and audit logging, with a focus on financial data integrity, secure authentication, and reliable transaction processing.
+
+## Key Features
+
+- **Authentication & Authorization** — JWT-based authentication, password hashing, and protected API endpoints.
+- **Wallet Management** — Wallet creation and balance management.
+- **Deposits** — Add funds to wallets and record deposit transactions.
+- **Money Transfers** — Transfer funds between users with transaction ledger and idempotency support.
+- **Withdrawals** — Support wallet withdrawal operations.
+- **Refund Management** — Handle refund workflows.
+- **Transaction History** — Maintain records of financial operations.
+- **Transaction Limits** — Support configurable transaction limits.
+- **Notifications** — Maintain notifications for relevant application events.
+- **Audit Logging** — Record application events for traceability.
+- **Database Migrations** — Manage schema changes with Alembic.
+- **Containerization** — Run the API and PostgreSQL database using Docker Compose.
+- **API Documentation** — Interactive Swagger UI and OpenAPI documentation.
+
+## Technology Stack
+
+| Component | Technology |
+|---|---|
+| Language | Python 3.12+ |
+| API Framework | FastAPI |
+| Database | PostgreSQL |
+| ORM | SQLAlchemy 2.x |
+| Data Validation | Pydantic v2 |
+| Authentication | JWT |
+| Password Hashing | Argon2 |
+| Database Migrations | Alembic |
+| API Server | Uvicorn |
+| Testing | Pytest, HTTPX |
+| Containerization | Docker, Docker Compose |
+| API Documentation | Swagger UI, OpenAPI |
+
+## Architecture
+
+The application uses a REST API architecture with PostgreSQL for persistent data storage.
+
+```text
+Client / API Consumer
+        |
+        v
+    FastAPI REST API
+        |
+        +---- Authentication & Authorization
+        |
+        +---- Wallet Operations
+        |
+        +---- Transaction Processing
+        |
+        +---- Deposits / Transfers / Withdrawals
+        |
+        +---- Refunds / Notifications / Audit Logs
+        |
+        v
+ SQLAlchemy ORM
+        |
+        v
+    PostgreSQL
+```
+
+Docker Compose manages the API and database containers, while Alembic handles database schema migrations.
+
+## Project Structure
+
+```text
+digital-wallet-platform/
+├── alembic/
+│   └── versions/          # Database migration scripts
+├── app/
+│   ├── core/              # Application configuration and security
+│   ├── db/                # Database engine and sessions
+│   ├── models/            # SQLAlchemy models
+│   ├── schemas/           # Pydantic request/response schemas
+│   ├── services/          # Business logic
+│   ├── api/               # API routes and endpoints
+│   └── main.py            # FastAPI application entry point
+├── tests/                 # Automated tests
+├── .dockerignore
+├── .env.example
+├── .gitignore
+├── alembic.ini
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+└── README.md
+```
+
+*Note: Adjust the directory names above if your actual project structure differs.*
+
+## Prerequisites
+
+To run the project locally, install:
+
+- Python 3.12 or later
+- Docker Desktop with Docker Compose
+- Git
+
+For local development without Docker, PostgreSQL must also be installed and running.
+
+## Getting Started
+
+### Option 1: Run with Docker Compose (Recommended)
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/venkatanaveen1820/digital-wallet-platform.git
+cd digital-wallet-platform
+```
+
+**2. Configure environment variables**
+
+Create a `.env.docker` file in the project root:
+
+```dotenv
+POSTGRES_DB=digital_wallet_docker
+POSTGRES_USER=wallet_app
+POSTGRES_PASSWORD=replace_with_a_strong_password
+JWT_SECRET_KEY=replace_with_a_long_random_secret
+```
+
+Use your own strong credentials. Keep `.env.docker` out of version control.
+
+**3. Validate the Docker configuration**
+
+```bash
+docker compose --env-file .env.docker config --quiet
+```
+
+**4. Build and start the database**
+
+```bash
+docker compose --env-file .env.docker up -d db
+```
+
+Wait until the database reports a healthy status.
+
+**5. Apply database migrations**
+
+```bash
+docker compose --env-file .env.docker run --rm migrate
+```
+
+**6. Start the API**
+
+```bash
+docker compose --env-file .env.docker up -d api
+```
+
+**7. Verify the running containers**
+
+```bash
+docker compose --env-file .env.docker ps
+```
+
+Check the application logs when troubleshooting:
+
+```bash
+docker compose --env-file .env.docker logs --tail 100 api
+```
+
+```bash
+docker compose --env-file .env.docker logs --tail 100 db
+```
+
+### Option 2: Run Locally
+
+**1. Create a virtual environment**
+
+```powershell
+python -m venv .venv
+```
+
+Activate it in Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+**2. Install dependencies**
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+**3. Configure the environment**
+
+Create a local `.env` file containing the required database connection string and JWT secret.
+
+Example:
+
+```dotenv
+DATABASE_URL=postgresql+psycopg2://postgres:your_password@localhost:5432/digital_wallet_db
+JWT_SECRET_KEY=replace_with_a_long_random_secret
+```
+
+Ensure PostgreSQL is running and the configured database exists.
+
+**4. Apply migrations**
+
+```bash
+python -m alembic upgrade head
+```
+
+**5. Start the development server**
+
+```bash
+uvicorn app.main:app --reload
+```
+
+## API Documentation
+
+When running with the Docker configuration described above, access the application at:
+
+| Resource | URL |
+|---|---|
+| API Base URL | `http://localhost:8002` |
+| Swagger UI | `http://localhost:8002/docs` |
+| ReDoc | `http://localhost:8002/redoc` |
+| Health Check | `http://localhost:8002/health` |
+
+The API port may differ depending on your Docker Compose configuration.
+
+Swagger UI allows you to inspect available endpoints, submit requests, and review response schemas.
+
+## Database Migrations
+
+Alembic is used to manage database schema changes.
+
+Apply all pending migrations:
+
+```bash
+python -m alembic upgrade head
+```
+
+Generate a migration after updating your SQLAlchemy models:
+
+```bash
+python -m alembic revision --autogenerate -m "describe schema change"
+```
+
+Review the generated migration before applying it.
+
+Run migrations in Docker:
+
+```bash
+docker compose --env-file .env.docker run --rm migrate
+```
+
+## Testing
+
+Run the automated test suite from your activated virtual environment:
+
+```bash
+pytest
+```
+
+Run tests with detailed output:
+
+```bash
+pytest -v
+```
+
+For financial transaction testing, important scenarios include:
+
+- Successful deposits and transfers.
+- Insufficient-funds rejection.
+- Invalid or expired authentication tokens.
+- Duplicate requests and idempotency.
+- Concurrent transactions and balance consistency.
+- Refund and withdrawal validation.
+- Transaction rollback when an operation fails.
+- Authorization checks for protected operations.
+
+## Financial Integrity and Security
+
+Financial operations require stronger safeguards than ordinary CRUD endpoints. The implementation should enforce the following principles:
+
+- **Atomic transactions:** Related balance and ledger changes should commit or roll back together.
+- **Concurrency control:** Prevent concurrent requests from producing inconsistent balances.
+- **Idempotency:** Prevent duplicate processing of supported retried requests.
+- **Ledger integrity:** Preserve the consistency and traceability of financial records.
+- **Authentication:** Protect endpoints using validated credentials and tokens.
+- **Authorization:** Restrict operations according to user permissions.
+- **Input validation:** Validate incoming requests with Pydantic schemas.
+- **Secret management:** Keep database credentials and signing secrets outside source control.
+
+These are core design requirements; their enforcement should be verified against the implementation and automated tests.
+
+## Docker Management
+
+Stop the application containers:
+
+```bash
+docker compose --env-file .env.docker stop
+```
+
+Restart the application:
+
+```bash
+docker compose --env-file .env.docker up -d
+```
+
+View container status:
+
+```bash
+docker compose --env-file .env.docker ps
+```
+
+Follow API logs:
+
+```bash
+docker compose --env-file .env.docker logs -f api
+```
+
+Stop and remove the containers and Compose network:
+
+```bash
+docker compose --env-file .env.docker down
+```
+
+The named PostgreSQL volume is retained by this command. Avoid `docker compose down -v` unless you intentionally want to remove the associated database volume and its persistent data.
+
+## Environment Variables
+
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | SQLAlchemy database connection URL |
+| `POSTGRES_DB` | PostgreSQL database name |
+| `POSTGRES_USER` | PostgreSQL application user |
+| `POSTGRES_PASSWORD` | PostgreSQL application password |
+| `JWT_SECRET_KEY` | Secret used for JWT signing |
+| `APP_NAME` | Application name |
+| `ENVIRONMENT` | Runtime environment |
+| `API_V1_PREFIX` | API version prefix, if used by the application |
+
+Configure only the variables supported by the current application settings.
+
+## Future Enhancements
+
+Potential improvements include:
+
+- Refresh-token rotation and revocation.
+- Role-based administrative controls.
+- Suspicious transaction detection and review workflows.
+- Email and real-time notifications.
+- Rate limiting and stronger abuse prevention.
+- Structured logging and application monitoring.
+- Integration and load testing for concurrent transactions.
+- CI/CD automation and production deployment configuration.
+
+## Contributing
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Implement your changes and add relevant tests.
+4. Run the test suite.
+5. Submit a pull request describing the changes.
+
+
+
+**Developed by Venkata Naveen Guruvugari**
+
+GitHub: [venkatanaveen1820](https://github.com/venkatanaveen1820)

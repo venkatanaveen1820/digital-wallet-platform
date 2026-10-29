@@ -1,0 +1,14 @@
+
+fastapi
+uvicorn[standard]
+sqlalchemy>=2.0
+psycopg2-binary
+alembic
+pydantic>=2.0
+pydantic-settings
+python-dotenv
+PyJWT
+argon2-cffi
+email-validator
+pytest
+httpx

@@ -1,0 +1,13 @@
+
+.venv/
+.git/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+.coverage
+htmlcov/
+.env
+.env.*
+!.env.example
+tests/
+swagger screenshots/
